@@ -1,4 +1,4 @@
-defmodule Board do
+defmodule Day4B.Board do
   use Agent
 
   def start_link() do
@@ -11,9 +11,9 @@ defmodule Board do
   end
 
   def create(numbers) do
-    {:ok, board} = Board.start_link()
+    {:ok, board} = Day4B.Board.start_link()
 
-    Board.init_board(board, numbers)
+    Day4B.Board.init_board(board, numbers)
   end
 
   def get_board(board, name) do
@@ -27,11 +27,15 @@ defmodule Board do
   end
 
   def mark_found(board, number) do
-    numbers = Board.get_board(board, "numbers")
+    numbers = Day4B.Board.get_board(board, "numbers")
 
     case Enum.member?(numbers, number) == true do
       true ->
-        Agent.update(board, &Map.put(&1, "numbers", Board.replace_value(numbers, number, true)))
+        Agent.update(
+          board,
+          &Map.put(&1, "numbers", Day4B.Board.replace_value(numbers, number, true))
+        )
+
         true
 
       false ->
@@ -40,7 +44,7 @@ defmodule Board do
   end
 
   def check_rows(board) do
-    matches = Board.get_board(board, "numbers")
+    matches = Day4B.Board.get_board(board, "numbers")
 
     matches
     |> Enum.chunk_every(5)
@@ -53,7 +57,7 @@ defmodule Board do
   end
 
   def check_columns(board) do
-    matches = Board.get_board(board, "numbers")
+    matches = Day4B.Board.get_board(board, "numbers")
 
     Enum.reduce_while(0..4, [], fn i, acc ->
       qqq =
@@ -81,13 +85,13 @@ defmodule Board do
 
   def check(board) do
     Enum.any?([
-      !Enum.empty?(Board.check_rows(board)),
-      !Enum.empty?(Board.check_columns(board))
+      !Enum.empty?(Day4B.Board.check_rows(board)),
+      !Enum.empty?(Day4B.Board.check_columns(board))
     ])
   end
 end
 
-defmodule Bingo do
+defmodule Day4B.Bingo do
   def parse_board_data(input) do
     input
     |> Enum.reject(&(&1 == ""))
@@ -108,7 +112,7 @@ defmodule Bingo do
 
   def read_input() do
     [numbers, _ | boards] =
-      File.stream!("./input.txt")
+      File.stream!("#{__DIR__}/input.txt")
       |> Enum.map(&String.trim/1)
 
     %{
@@ -119,7 +123,7 @@ defmodule Bingo do
 
   def main() do
     %{numbers: bingo_numbers, boards: board_numbers} = read_input()
-    boards = Enum.map(board_numbers, &Board.create(&1))
+    boards = Enum.map(board_numbers, &Day4B.Board.create(&1))
 
     [last_board, last_number] =
       Enum.reduce_while(
@@ -128,9 +132,9 @@ defmodule Bingo do
         fn current_number, boards ->
           boards =
             Enum.reduce_while(boards, boards, fn board, boards ->
-              Board.mark_found(board, current_number)
+              Day4B.Board.mark_found(board, current_number)
 
-              Board.check(board)
+              Day4B.Board.check(board)
               |> case do
                 true ->
                   boards_left = Enum.reject(boards, &(&1 == board))
@@ -154,12 +158,16 @@ defmodule Bingo do
         end
       )
 
-    Board.count_score(
-      Board.get_board(last_board, "numbers"),
+    Day4B.Board.count_score(
+      Day4B.Board.get_board(last_board, "numbers"),
       last_number
     )
   end
 end
 
-Bingo.main()
-|> IO.inspect()
+defmodule Day4B do
+  def start() do
+    Day4B.Bingo.main()
+    |> IO.inspect()
+  end
+end

@@ -1,4 +1,4 @@
-defmodule Board do
+defmodule Day4A.Board do
   use Agent
 
   def start_link() do
@@ -12,9 +12,9 @@ defmodule Board do
   end
 
   def create(numbers) do
-    {:ok, board} = Board.start_link()
+    {:ok, board} = Day4A.Board.start_link()
 
-    Board.init_board(board, numbers)
+    Day4A.Board.init_board(board, numbers)
   end
 
   def get_board(board, name) do
@@ -31,12 +31,17 @@ defmodule Board do
   end
 
   def mark_found(board, number) do
-    numbers = Board.get_board(board, "numbers")
+    numbers = Day4A.Board.get_board(board, "numbers")
 
     case Enum.member?(numbers, number) == true do
       true ->
-        matches = Board.get_board(board, "matches")
-        Agent.update(board, &Map.put(&1, "matches", Board.replace_value(matches, number, true)))
+        matches = Day4A.Board.get_board(board, "matches")
+
+        Agent.update(
+          board,
+          &Map.put(&1, "matches", Day4A.Board.replace_value(matches, number, true))
+        )
+
         true
 
       false ->
@@ -45,7 +50,7 @@ defmodule Board do
   end
 
   def check_rows(board) do
-    matches = Board.get_board(board, "matches")
+    matches = Day4A.Board.get_board(board, "matches")
 
     matches
     |> Enum.chunk_every(5)
@@ -66,7 +71,7 @@ defmodule Board do
   end
 end
 
-defmodule Bingo do
+defmodule Day4A.Bingo do
   def parse_board_data(input) do
     input
     |> Enum.reject(&(&1 == ""))
@@ -87,7 +92,7 @@ defmodule Bingo do
 
   def read_input() do
     [numbers, _ | boards] =
-      File.stream!("./input.txt")
+      File.stream!("#{__DIR__}/input.txt")
       |> Enum.map(&String.trim/1)
 
     %{
@@ -98,16 +103,16 @@ defmodule Bingo do
 
   def main() do
     %{numbers: bingo_numbers, boards: board_numbers} = read_input()
-    boards = Enum.map(board_numbers, &Board.create(&1))
+    boards = Enum.map(board_numbers, &Day4A.Board.create(&1))
 
     %{winning_board: winning_board, number: number} =
       Enum.reduce_while(bingo_numbers, [], fn number, acc ->
         result =
           Enum.reduce_while(boards, [], fn board, acc2 ->
-            Board.mark_found(board, number)
+            Day4A.Board.mark_found(board, number)
             |> case do
               true ->
-                result = Board.check_rows(board)
+                result = Day4A.Board.check_rows(board)
 
                 case Enum.any?(result) do
                   true -> {:halt, result}
@@ -125,9 +130,13 @@ defmodule Bingo do
         end
       end)
 
-    Board.count_score(winning_board, number)
+    Day4A.Board.count_score(winning_board, number)
   end
 end
 
-Bingo.main()
-|> IO.inspect()
+defmodule Day4A do
+  def start() do
+    Day4A.Bingo.main()
+    |> IO.inspect()
+  end
+end

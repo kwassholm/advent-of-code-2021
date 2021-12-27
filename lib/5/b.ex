@@ -1,4 +1,4 @@
-defmodule Matrix do
+defmodule Day5B.Matrix do
   use Agent
 
   defp start_link(matrix_size) do
@@ -46,9 +46,9 @@ defmodule Matrix do
   end
 end
 
-defmodule Day5 do
+defmodule Day5B do
   def read_input() do
-    File.stream!("./input.txt")
+    File.stream!("#{__DIR__}/input.txt")
     |> Enum.map(&String.trim/1)
   end
 
@@ -57,8 +57,8 @@ defmodule Day5 do
     |> Enum.map(&String.to_integer(&1))
   end
 
-  def main() do
-    matrix = Matrix.create(matrix_size: 999)
+  def start() do
+    matrix = Day5B.Matrix.create(matrix_size: 999)
 
     read_input()
     |> Enum.map(&String.split(&1, " -> "))
@@ -83,12 +83,10 @@ defmodule Day5 do
     |> Enum.reject(&(&1 == nil))
     |> Enum.map(fn input ->
       Enum.map(input, fn {x, y} ->
-        Matrix.update_point(matrix, {x, y})
+        Day5B.Matrix.update_point(matrix, {x, y})
       end)
     end)
 
-    Matrix.draw_map(matrix, do_draw: false)
+    Day5B.Matrix.draw_map(matrix, do_draw: false)
   end
 end
-
-Day5.main()

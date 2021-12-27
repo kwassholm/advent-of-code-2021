@@ -1,4 +1,4 @@
-defmodule Test do
+defmodule Day3B do
   defp get_common(most, least, values) do
     half = Enum.count(values) / 2
 
@@ -37,16 +37,16 @@ defmodule Test do
       end
     )
   end
+
+  def start() do
+    File.stream!("#{__DIR__}/input.txt")
+    |> Enum.map(&String.trim(&1))
+    |> (fn rows ->
+          [oxygen] = Day3B.just_do_it(rows, Day3B.get_common("1", "0"))
+          [scrubber] = Day3B.just_do_it(rows, Day3B.get_common("0", "1"))
+
+          String.to_integer(oxygen, 2) * String.to_integer(scrubber, 2)
+        end).()
+    |> IO.inspect()
+  end
 end
-
-contents =
-  File.stream!("./input.txt")
-  |> Enum.map(&String.trim(&1))
-  |> (fn rows ->
-        [oxygen] = Test.just_do_it(rows, Test.get_common("1", "0"))
-        [scrubber] = Test.just_do_it(rows, Test.get_common("0", "1"))
-
-        String.to_integer(oxygen, 2) * String.to_integer(scrubber, 2)
-      end).()
-
-IO.inspect(contents)
